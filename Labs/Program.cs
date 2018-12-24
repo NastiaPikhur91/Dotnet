@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,8 @@ namespace Labs
     class Program
     {
         static void Main(string[] args)
-        {
+        {   
+            /*
             #region Lab_1
             Student student = new Student();
             Console.WriteLine("1. " + student.ToShortString());
@@ -101,6 +103,51 @@ namespace Labs
             }
             Console.WriteLine(Environment.TickCount - saveTick);
 
+            Console.ReadKey();
+            #endregion
+            */
+
+            #region Lab_2
+            Person a = new Person("Ivan", "Ivanov", new DateTime(2000, 1, 1));
+            Person b = new Person("Ivan", "Ivanov", new DateTime(2000, 1, 1));
+            Console.WriteLine("a == b ? " + (a == b));
+            Console.WriteLine("hash a : " + a.GetHashCode() + ", hash b : " + b.GetHashCode());
+            Student student = new Student("John", "Johnson", new DateTime(1999, 2, 1), Education.Bachelor, 313);
+            student.Exams = new ArrayList
+            {
+                 new Exam("Calculus", 4, DateTime.Now),
+                new Exam("C#", 5, DateTime.Now)
+            };
+            student.Tests = new ArrayList
+            {
+                new Test("Java", true),
+                new Test("Databases", true)
+            };
+            Console.WriteLine(student);
+            Console.WriteLine(student.Person);
+
+            Student copy = (Student)student.DeepCopy();
+
+            foreach (Test test in student.Tests)
+            {
+                test.IsPassed = false;
+            }
+            (student.Exams[0] as Exam).Grade = 2;
+
+            Console.WriteLine('\n' + student.ToString() + '\n' + copy.ToString());
+
+            try
+            {
+                student.Group = 9000;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            foreach (Exam exam in student.GetExamsGraderThan(3))
+            {
+                Console.WriteLine(exam);
+            }
             Console.ReadKey();
             #endregion
         }

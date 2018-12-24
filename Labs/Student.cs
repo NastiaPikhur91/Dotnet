@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,30 +7,39 @@ using System.Threading.Tasks;
 
 namespace Labs
 {
-    public class Student
+    public class Student : Person, IDateAndCopy
     {
-        private Person person;
         private Education education;
         private int group;
-        private Exam[] exams;
+        private ArrayList tests;
+        private ArrayList exams;
 
-        public Student(Person person, Education education, int group)
+        public Student() : base() { }
+
+        public Student(string firstName, string lastName, DateTime dateOfBirth, Education education, int group)
+            : base(firstName, lastName, dateOfBirth)
         {
-            Person = person;
             Education = education;
             Group = group;
         }
 
-        public Student()
+        public Student(Person person, Education education, int group)
+            : base(person.FirstName, person.LastName, person.DateOfBirth)
         {
-            Person = new Person();
+            Education = education;
+            Group = group;
         }
 
 
         public Person Person
         {
-            get => person;
-            set => person = value;
+            get => new Person(firstName, lastName, dateOfBirth);
+            set
+            {
+                FirstName = value.FirstName;
+                LastName = value.LastName;
+                DateOfBirth = value.DateOfBirth;
+            }
         }
 
         public Education Education
@@ -40,22 +50,38 @@ namespace Labs
 
         public int Group
         {
-            get => group;
-            set => group = value;
+            set
+            {
+                if (value <= 100 || value > 699)
+                {
+                    throw new ArgumentException("Number of group must be between 101 and 699, included.");
+                }
+                else
+                {
+                    group = value;
+                }
+            }
+
         }
 
-        public Exam[] Exams
+        public ArrayList Exams
         {
             get => exams;
             set => exams = value;
+        }
+        public ArrayList Tests
+        {
+            get => tests;
+            set => tests = value;
         }
 
         public double AvgGrade
         {
             get => exams != null
-                ? exams.Average(exam => exam.Grade)
+                ? exams.Cast<Exam>().Average(exam => exam.Grade)
                 : 0;
         }
+        
 
         public bool this[Education toCompare]
         {
@@ -65,26 +91,32 @@ namespace Labs
         
         public void AddExams(params Exam[] newExams)
         {
-            if (exams != null && Exams.Length != 0)
+            if (exams != null && Exams.Count != 0)
             {
-                Exam[] concatExams = new Exam[exams.Length + newExams.Length];
-                exams.CopyTo(concatExams, 0);
-                newExams.CopyTo(concatExams, exams.Length);
-                exams = concatExams;
+                Exams.AddRange(newExams);
             }
             else
             {
-                exams = newExams;
+                exams = new ArrayList(newExams);
             }
         }
 
         public override string ToString()
         {
-            string result = "Person: " + person.ToString() + "\n"
+            string result = "Person: " + base.ToString() + "\n"
                 + education.ToString() + ", " + group.ToString() + " group\nExams: ";
             if (exams != null)
             {
-                result += string.Join<Exam>("\n", exams);
+                result += string.Join<Exam>("\n", exams.Cast<Exam>());
+            }
+            else
+            {
+                result += "none";
+            }
+            result += "\n, Tests:";
+            if (tests != null)
+            {
+                result += string.Join<Test>("\n", tests.Cast<Test>());
             }
             else
             {
@@ -93,11 +125,37 @@ namespace Labs
             return result;
         }
 
-        public virtual string ToShortString()
+        public override string ToShortString()
         {
-            return "Student: " + person.ToString() + "\n"
-                + education.ToString() + ", " + group.ToString() + " group\n"
+            return "Student: " + base.ToString() + "\n"
+                 + education.ToString() + ", " + group.ToString() + " group\n"
                 + "Average grade: " + AvgGrade.ToString();
+        }
+
+        public override object DeepCopy()
+        {
+            return new Student
+            {
+                Person = this.Person,
+                Education = this.education,
+                Group = this.group,
+                Exams = new ArrayList(exams.Cast<Exam>().Select(exam => exam.DeepCopy()).ToArray()),
+                Tests = new ArrayList(tests.Cast<Test>().Select(test => new Test(test.Name, test.IsPassed)).ToArray())
+            };
+        }
+
+        public IEnumerable GetExamsGraderThan(double compare)
+        {
+            return exams.Cast<Exam>().Where(exam => exam.Grade > compare);
+        }
+        public IEnumerable ExamsAndTests
+        {
+            get
+            {
+                ArrayList examsAndTests = new ArrayList { exams };
+                examsAndTests.AddRange(tests);
+                return examsAndTests.Cast<object>();
+            }
         }
     }
 }
