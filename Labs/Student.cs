@@ -19,20 +19,18 @@ namespace Labs
             Group = 101;
         }
 
-        public Student(string firstName, string lastName, DateTime dateOfBirth, Education education, int group, List<Exam> exams)
+        public Student(string firstName, string lastName, DateTime dateOfBirth, Education education, int group)
             : base(firstName, lastName, dateOfBirth)
         {
             Education = education;
             Group = group;
-            Exams = exams;
         }
 
-        public Student(Person person, Education education, int group, List<Exam> exams)
+        public Student(Person person, Education education, int group)
             : base(person.FirstName, person.LastName, person.DateOfBirth)
         {
             Education = education;
             Group = group;
-            Exams = exams;
         }
 
 
@@ -144,9 +142,9 @@ namespace Labs
 
         public override string ToShortString()
         {
-            return "Student: " + base.ToString() + "\n"
-                 + education.ToString() + ", " + group.ToString() + " group\n"
-                + "Average grade: " + AvgGrade.ToString();
+            return "Student: " + base.ToShortString() + ", "
+                + education.ToString() + ", " + group.ToString() + " group, "
+                + "average grade: " + AvgGrade.ToString();
         }
 
         public override object DeepCopy()

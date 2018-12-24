@@ -1,14 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Labs
 {
     public class StudentCollection
     {
+        public event StudentListHandler StudentCountChanged;
+        public event StudentListHandler StudentReferenceChanged;
         private readonly List<Student> students;
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public Student this[int index]
+        {
+            get
+            {
+                return students[index];
+            }
+            set
+            {
+                students[index] = value;
+
+                StudentListHandlerEventArgs args = new StudentListHandlerEventArgs
+                {
+                    Name = this.Name,
+                    Info = "Student reference changed",
+                    Index = index
+                };
+
+                StudentReferenceChanged?.Invoke(value, args);
+            }
+        }
 
         public StudentCollection()
         {
@@ -24,7 +51,17 @@ namespace Labs
         {
             for (int i = 0; i < n; i++)
             {
-                students.Add(new Student());
+                Student student = new Student();
+                students.Add(student);
+
+                StudentListHandlerEventArgs args = new StudentListHandlerEventArgs
+                {
+                    Name = this.Name,
+                    Info = "Default student added",
+                    Index = students.Count - 1
+                };
+
+                StudentCountChanged?.Invoke(student, args);
             }
         }
 
@@ -33,7 +70,38 @@ namespace Labs
             foreach (Student student in _students)
             {
                 students.Add(student);
+                StudentListHandlerEventArgs args = new StudentListHandlerEventArgs
+                {
+                    Name = this.Name,
+                    Info = "Student added",
+                    Index = students.Count - 1
+                };
+
+                StudentCountChanged?.Invoke(student, args);
             }
+        }
+
+        public bool Remove(int index)
+        {
+            if (index <= 0 || index > students.Count())
+            {
+                StudentListHandlerEventArgs args = new StudentListHandlerEventArgs
+                {
+                    Name = this.Name,
+                    Info = "Student removed",
+                    Index = index
+                };
+
+                StudentCountChanged?.Invoke(students[index], args);
+
+                students.RemoveAt(index);
+            }
+            else
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public override string ToString()
