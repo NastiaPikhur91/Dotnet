@@ -11,23 +11,28 @@ namespace Labs
     {
         private Education education;
         private int group;
-        private ArrayList tests;
-        private ArrayList exams;
+        private List<Test> tests;
+        private List<Exam> exams;
 
-        public Student() : base() { }
+        public Student() : base()
+        {
+            Group = 101;
+        }
 
-        public Student(string firstName, string lastName, DateTime dateOfBirth, Education education, int group)
+        public Student(string firstName, string lastName, DateTime dateOfBirth, Education education, int group, List<Exam> exams)
             : base(firstName, lastName, dateOfBirth)
         {
             Education = education;
             Group = group;
+            Exams = exams;
         }
 
-        public Student(Person person, Education education, int group)
+        public Student(Person person, Education education, int group, List<Exam> exams)
             : base(person.FirstName, person.LastName, person.DateOfBirth)
         {
             Education = education;
             Group = group;
+            Exams = exams;
         }
 
 
@@ -64,12 +69,12 @@ namespace Labs
 
         }
 
-        public ArrayList Exams
+        public List<Exam> Exams
         {
             get => exams;
             set => exams = value;
         }
-        public ArrayList Tests
+        public List<Test> Tests
         {
             get => tests;
             set => tests = value;
@@ -97,7 +102,19 @@ namespace Labs
             }
             else
             {
-                exams = new ArrayList(newExams);
+                exams = new List<Exam>(newExams);
+            }
+        }
+
+        public void AddTests(params Test[] tests)
+        {
+            if (Tests == null)
+            {
+                Tests = new List<Test>(tests);
+            }
+            else
+            {
+                Tests.AddRange(tests);
             }
         }
 
@@ -139,12 +156,12 @@ namespace Labs
                 Person = this.Person,
                 Education = this.education,
                 Group = this.group,
-                Exams = new ArrayList(exams.Cast<Exam>().Select(exam => exam.DeepCopy()).ToArray()),
-                Tests = new ArrayList(tests.Cast<Test>().Select(test => new Test(test.Name, test.IsPassed)).ToArray())
+                Exams = new List<Exam>(exams.Select(exam => exam.DeepCopy() as Exam)),
+                Tests = new List<Test>(tests.Select(test => new Test(test.Name, test.IsPassed)))
             };
         }
 
-        public IEnumerable GetExamsGraderThan(double compare)
+        public IEnumerable GetExamsGraterThan(double compare)
         {
             return exams.Cast<Exam>().Where(exam => exam.Grade > compare);
         }
@@ -156,6 +173,19 @@ namespace Labs
                 examsAndTests.AddRange(tests);
                 return examsAndTests.Cast<object>();
             }
+        }
+        public IEnumerable<Exam> GetExamsByName(string name)
+        {
+            foreach (var o in Exams)
+            {
+                var article = o as Exam;
+                if (article == null || !article.SubjectName.Contains(name))
+                {
+                    continue;
+                }
+                yield return article;
+            }
+            
         }
     }
 }
